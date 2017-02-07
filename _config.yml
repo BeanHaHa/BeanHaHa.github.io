@@ -1,8 +1,8 @@
 # Basic
 title: Daobin's Den
-subtitle: 随心随性，大法~
+subtitle: 随心随性 靠, 就是想干嘛干嘛
 welcome_message: 
-description: 嗨，我是稻草人 (@daobin)，一名来自中国的 Java / Js 开发者。现居杭州，就职于 保险师。修行路上，吾将上下求索
+description: Hello，我是稻草人 (@daobin), Java / Js 开发者一名, 现居杭州。漫漫修行路, 吾将上下求索
 creator: <a href="http://daobin.wang">@daobin</a>
 
 url: "http://daobin.wang"
@@ -22,7 +22,7 @@ blog_button:
 
 # Navigation buttons in the front page.
 nav:
-    - {title: 关于, description: 稻草人的介绍, url: 'http://about.daobin.wang'}
+    # - {title: 关于, description: 稻草人的介绍, url: 'http://about.daobin.wang'}
     # - {title: Another Button, description: A button, url: 'http://example.com'}
 
 # Pagination
@@ -42,5 +42,5 @@ social:
 
 # Google Analytics
 ga:
-    # id: your_ga_id
-    # host: your_host
+     id: UA-91542598-1
+     host: http://daobin.wang/
