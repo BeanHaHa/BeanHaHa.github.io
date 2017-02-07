@@ -43,4 +43,4 @@ social:
 # Google Analytics
 ga:
      id: UA-91542598-1
-     host: http://daobin.wang/
+     host: auto
