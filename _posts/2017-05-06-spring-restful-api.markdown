@@ -215,7 +215,7 @@ public class MyExceptionResolver implements HandlerExceptionResolver {
 
 在Spring MVC中，所有用于处理在请求映射和请求处理过程中抛出的异常的类，都要实现`HandlerExceptionResolver`接口。`AbstractHandlerExceptionResolver`实现该接口和`Orderd`接口，是HandlerExceptionResolver类的实现的基类。`ResponseStatusExceptionResolver`等具体的异常处理类均在`AbstractHandlerExceptionResolver`之上，实现了具体的异常处理方式。一个基于Spring MVC的Web应用程序中，可以存在多个实现了`HandlerExceptionResolver`的异常处理类，他们的执行顺序，由其order属性决定, order值越小，越是优先执行, 在执行到第一个返回不是null的ModelAndView的Resolver时，不再执行后续的尚未执行的Resolver的异常处理方法。如下图：
 
-![SpringMVCExceptionResolver](https://raw.githubusercontent.com/smshen/MarkdownPhotos/master/Res/test.jpg)
+![SpringMVCExceptionResolver](https://raw.githubusercontent.com/BeanHaHa/BeanHaHa.github.io/master/assets/images/2017/SpringMVCExceptionResolver.png)
 
 车险项目就是采用继承`AbstractHandlerExceptionResolver`类实现全局异常处理：
 ```java
@@ -277,7 +277,7 @@ public class ExceptionHandlerBean  extends ResponseEntityExceptionHandler {
 ## 车险项目全局异常处理实现
 
 使用第二种方式：继承`AbstractHandlerExceptionResolver`类，实现具体异常处理。
-![RestExceptionHandler](https://raw.githubusercontent.com/smshen/MarkdownPhotos/master/Res/test.jpg)
+![RestExceptionHandler](https://raw.githubusercontent.com/BeanHaHa/BeanHaHa.github.io/master/assets/images/2017/restExceotionHandler.png)
 
 定义RestFul接口返回对象：
 ```java
