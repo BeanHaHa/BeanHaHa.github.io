@@ -2,7 +2,7 @@
 layout: post
 title: Spring RestFul API统一异常处理
 date: 2017-05-07
-tags: [JAVA, Spring]
+tags: [Spring-RestFul]
 ---
 
 ## 概要
