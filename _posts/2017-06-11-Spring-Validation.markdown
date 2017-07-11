@@ -1,7 +1,8 @@
-title: Spring Validation 实现前置参数页校验
+---
+layout: post
+title: Spring Validation 实现前置参数校验
 date: 2017-06-11
-categories: 学习
-tags: [Spring]
+tags: [Spring-Validation]
 ---
 
 ## 必要性
