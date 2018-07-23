@@ -27,7 +27,7 @@ tags: [Wechat]
 * 申请测试号
 * 开发者配置，接管微信服务器信息
 
-![Wechat_config](https://raw.githubusercontent.com/BeanHaHa/BeanHaHa.github.io/master/assets/images/2018/wechat_config.jpg)
+![Wechat_config](https://raw.githubusercontent.com/BeanHaHa/BeanHaHa.github.io/master/assets/images/2018/wechat_config.png)
 
 ```java
     /**
