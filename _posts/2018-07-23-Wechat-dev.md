@@ -160,3 +160,135 @@ public String processRequest(HttpServletRequest request) {
     return respMessage;
 }
 ```
+* 业务展开
+目前保箱业务主要围绕投保人订单展开，订单管理（A端订单 + B端订单），订单详情，电子保单申请，发票开票，以及保单续保。还有支撑计划书的微信授权获取C用户信息
+
+## 技术点：
+* 订单列表查询利用了`Google Guava`包的`ListenableFuture`并发查询A端和B端订单库，最后封装成统一格式返回前端展示
+ListenableFuture会检测Future是否完成，如果完成就会自动调用回调函数，这样能减少并发程序的复杂度。
+```java
+// 通过MoreExecutors类的静态方法listeningDecorator方法初始化一个ListeningExecutorService的方法
+// 然后使用此实例的submit方法初始化ListenableFuture对象
+ListeningExecutorService service = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
+
+// 计数器，A端查询task和B端查询task完成后 继续执行主线程
+final CountDownLatch latch = new CountDownLatch(2);
+// 接收A/B订单 list
+final List<OrderDTO> allOrder = Lists.newArrayList();
+
+
+// 任务一：查询A端保单列表
+ListenableFuture<List<OrderDTO>> futureTaskFromA = service.submit(new Callable<List<OrderDTO>>() {
+    @Override
+    public List<OrderDTO> call() throws Exception {
+        List<OrderDTO> list = clientOrderManager.getToaPolicyList(mobile);
+        return list;
+    }
+});
+
+Futures.addCallback(futureTaskFromA, new FutureCallback<List<OrderDTO>>() {
+    @Override
+    public void onSuccess(List<OrderDTO> resultFromA) {
+        if (!CollectionUtils.isEmpty(resultFromA)) {
+            allOrder.addAll(resultFromA);
+        }
+        latch.countDown();
+    }
+
+    @Override
+    public void onFailure(Throwable t) {
+        latch.countDown();
+    }
+});
+// 任务二：查询B端保单列表
+ListenableFuture<List<OrderDTO>> futureTaskFromB = service.submit(new Callable<List<OrderDTO>>() {
+    @Override
+    public List<OrderDTO> call() throws Exception {
+        DubboResultDTO result = customerClientOrderService.queryOrderList(mobile, null, null);
+        return clientOrderManager.getTobOrderList(result);
+    }
+});
+
+Futures.addCallback(futureTaskFromB, new FutureCallback<List<OrderDTO>>() {
+    @Override
+    public void onSuccess(List<OrderDTO> resultFromB) {
+        if (!CollectionUtils.isEmpty(resultFromB)) {
+            allOrder.addAll(resultFromB);
+        }
+        latch.countDown();
+    }
+
+    @Override
+    public void onFailure(Throwable t) {
+        latch.countDown();
+    }
+});
+```
+* A端订单通过PolicyService提供的Dubbo接口查询，基于[Sharding-JDBC](https://github.com/shardingjdbc/sharding-jdbc)查询100张表返回投保人订单
+* 前端页面获取openId，实现类似token登陆机制
+* 微信授权，用户在微信客户端中访问第三方网页，公众号可以通过微信网页授权机制，来获取用户基本信息，进而实现业务逻辑。
+微信的认证授权是基于OAuth2.0机制实现的，OAuth2.0基本模式可以理解为用户在授权方进行登录，再由授权方回调请求授权方的接口并带上接口调用凭证，请求授权方再使用该凭证和秘钥信息调用授权方用户信息的相关接口
+微信授权可分为静默授权`（scope=snsapi_base）`和非静默授权`（scope=snsapi_userinfo）`，区别：
+静默授权可获得用户openId,并自动跳转到回调页，用户无感知
+非静默授权用来获取用户的基本信息的。这种授权需要用户手动同意。无须关注，就可在授权后获取该用户的基本信息
+
+基本步骤如下：
+1. 用户同意授权，获取code
+2. 通过code换取网页授权access_token
+3. 刷新access_token（如果需要）
+4. 拉取用户信息(需scope为 snsapi_userinfo)
+5. 检验授权凭证（access_token）是否有效
+```java
+/**
+ * 授权
+ */
+private static final String AUTH_URL = "https://open.weixin.qq.com/connect/oauth2/authorize?";
+
+/**
+ * 构建授权跳转URL
+ * @param redirectUrl 授权后的跳转URL(我方服务器URL)
+ * @param quiet 是否静默: true: 仅获取openId，false: 获取openId和个人信息(需用户手动确认)
+ * @return 微信授权跳转URL
+ */
+public String authUrl(String redirectUrl, Boolean quiet) {
+    try {
+        Preconditions.checkNotNullAndEmpty(redirectUrl, "redirectUrl");
+        redirectUrl = URLEncoder.encode(redirectUrl, "utf-8");
+        return AUTH_URL +
+                "appid=" + wechat.getAppId() +
+                "&redirect_uri=" + redirectUrl +
+                "&response_type=code&scope=" +
+                (quiet ? AuthTypeEnum.BASE.scope() : AuthTypeEnum.USER_INFO.scope())
+                + "&state=1#wechat_redirect";
+    } catch (UnsupportedEncodingException e) {
+        throw new WechatException(e);
+    }
+}
+```
+
+```java
+public enum AuthTypeEnum {
+    BASE("snsapi_base"),
+
+    USER_INFO("snsapi_userinfo");
+
+    private String scope;
+
+    AuthTypeEnum(String scope){
+        this.scope = scope;
+    }
+
+    public String scope(){
+        return scope;
+    }
+
+}
+```
+
+授权开发经过了两个版本，第一个版本 在前端中间页授权，但是授权过程中会有空白页出现，后来改成了服务端授权，流程图如下：
+![wechat_oauth](https://raw.githubusercontent.com/BeanHaHa/BeanHaHa.github.io/master/assets/images/2018/wechat_oatuh.png)
+
+
+## 微信组件化
+
+## 微信开发小工具
