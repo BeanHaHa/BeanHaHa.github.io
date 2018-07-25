@@ -289,7 +289,7 @@ public enum AuthTypeEnum {
 ```
 
 授权开发经过了两个版本，第一个版本 在前端中间页授权，但是授权过程中会有空白页出现，后来改成了服务端授权，流程图如下：
-![wechat_oauth](https://raw.githubusercontent.com/BeanHaHa/BeanHaHa.github.io/master/assets/images/2018/wechat_oatuh.png)
+![wechat_oauth](https://raw.githubusercontent.com/BeanHaHa/BeanHaHa.github.io/master/assets/images/2018/wechat_oauth.png)
 
 
 ## 微信组件化
