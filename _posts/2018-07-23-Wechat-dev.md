@@ -166,6 +166,7 @@ public String processRequest(HttpServletRequest request) {
 ## 技术点：
 * 订单列表查询利用了`Google Guava`包的`ListenableFuture`并发查询A端和B端订单库，最后封装成统一格式返回前端展示
 ListenableFuture会检测Future是否完成，如果完成就会自动调用回调函数，这样能减少并发程序的复杂度。
+
 ```java
 // 通过MoreExecutors类的静态方法listeningDecorator方法初始化一个ListeningExecutorService的方法
 // 然后使用此实例的submit方法初始化ListenableFuture对象
@@ -224,6 +225,7 @@ Futures.addCallback(futureTaskFromB, new FutureCallback<List<OrderDTO>>() {
     }
 });
 ```
+
 * A端订单通过PolicyService提供的Dubbo接口查询，基于[Sharding-JDBC](https://github.com/shardingjdbc/sharding-jdbc)查询100张表返回投保人订单
 * 前端页面获取openId，实现类似token登陆机制
 * 微信授权，用户在微信客户端中访问第三方网页，公众号可以通过微信网页授权机制，来获取用户基本信息，进而实现业务逻辑。
@@ -238,6 +240,7 @@ Futures.addCallback(futureTaskFromB, new FutureCallback<List<OrderDTO>>() {
 3. 刷新access_token（如果需要）
 4. 拉取用户信息(需scope为 snsapi_userinfo)
 5. 检验授权凭证（access_token）是否有效
+
 ```java
 /**
  * 授权
