@@ -293,5 +293,179 @@ public enum AuthTypeEnum {
 
 
 ## 微信组件化
+[Git项目地址](http://git.winbaoxian.com:8888/daobin/bxs-wechat)
+
+微信公众号相关功能开发可以组件化、模块化
+
+```java
+/**
+ * 基础组件
+ * @return
+ */
+public Base base() {
+    return (Base) components.getUnchecked(BASE);
+}
+
+/**
+ * js-sdk组件
+ * @return
+ */
+public JsSdks js(){
+    return (JsSdks) components.getUnchecked(JSSDKS);
+}
+
+/**
+ * 菜单组件
+ * @return
+ */
+public Menus menu(){
+    return (Menus)components.getUnchecked(MENUS);
+}
+
+/**
+ * 用户组件
+ * @return
+ */
+
+public Users users(){
+    return (Users) components.getUnchecked(USERS);
+}
+```
+
+比如基础组件中可以放：授权，获取接口请求access_token，获取openId等一些基础功能服务
+
+```java
+/**
+ * 授权
+ */
+private static final String AUTH_URL = "https://open.weixin.qq.com/connect/oauth2/authorize?";
+
+/**
+ * 获取accessToken(调用其他公众号接口需要)
+ */
+private static final String ACCESS_TOKEN_URL = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential";
+
+/**
+ * 获取accessToken(用户同意授权后，获取用户信息前，需要该accessToken，有别于上面的accessToken)
+ * <p>
+ *     <a href="http://mp.weixin.qq.com/wiki/17/c0f37d5704f0b64713d5d2c37b468d75.html" target="_blank">参考链接</a>
+ * </p>
+ */
+private static final String AUTH_ACCESS_TOKEN_URL = "https://api.weixin.qq.com/sns/oauth2/access_token?grant_type=authorization_code";
+
+/**
+ * 获取用户openId
+ * @param code 用户授权的code
+ * @param callback 回调
+ */
+public void openId(final String code, final Callback<String> callback){
+    doAsync(new AbstractAsyncFunction<String>(callback) {
+        @Override
+        public String execute() {
+            return openId(code);
+        }
+    });
+}
+/**
+ * 获取用户openId
+ * @param code 用户授权的code
+ * @return 用户的openId，或抛WechatException
+ */
+public String openId(String code){
+    Preconditions.checkNotNullAndEmpty(code, "code");
+    String url = AUTH_ACCESS_TOKEN_URL +
+            "&appid=" + wechat.getAppId() +
+            "&secret=" + wechat.getAppSecret() +
+            "&code=" + code;
+
+    Map<String, Object> resp = doGet(url);
+
+    return (String)resp.get("openid");
+}
+
+/**
+ * 构建授权跳转URL(静默授权，仅获取用户openId，不包括个人信息)
+ * @param redirectUrl 授权后的跳转URL(我方服务器URL)
+ * @return 微信授权跳转URL
+ */
+public String authUrl(String redirectUrl) {
+    return authUrl(redirectUrl, Boolean.TRUE);
+}
+/**
+ * 构建授权跳转URL
+ * @param redirectUrl 授权后的跳转URL(我方服务器URL)
+ * @param quiet 是否静默: true: 仅获取openId，false: 获取openId和个人信息(需用户手动确认)
+ * @return 微信授权跳转URL
+ */
+public String authUrl(String redirectUrl, Boolean quiet) {
+    try {
+        Preconditions.checkNotNullAndEmpty(redirectUrl, "redirectUrl");
+        redirectUrl = URLEncoder.encode(redirectUrl, "utf-8");
+        return AUTH_URL +
+                "appid=" + wechat.getAppId() +
+                "&redirect_uri=" + redirectUrl +
+                "&response_type=code&scope=" +
+                (quiet ? AuthTypeEnum.BASE.scope() : AuthTypeEnum.USER_INFO.scope())
+                + "&state=1#wechat_redirect";
+    } catch (UnsupportedEncodingException e) {
+        throw new WechatException(e);
+    }
+}
+```
+
+菜单组件：
+
+```java
+/**
+ * 查询菜单
+ */
+private static final String GET = "https://api.weixin.qq.com/cgi-bin/menu/get?access_token=";
+
+/**
+ * 创建菜单
+ */
+private static final String CREATE = "https://api.weixin.qq.com/cgi-bin/menu/create?access_token=";
+
+/**
+ * 删除菜单
+ */
+private static final String DELETE = "https://api.weixin.qq.com/cgi-bin/menu/delete?access_token=";
+
+/**
+ * 查询菜单
+ * @param accessToken accessToken
+ * @return 菜单列表
+ */
+public List<Menu> get(String accessToken){
+    Preconditions.checkNotNullAndEmpty(accessToken, "accessToken");
+
+    String url = GET + accessToken;
+    Map<String, Object> resp = null;
+    try {
+        resp = doGet(url);
+    } catch (WechatException e) {
+        Integer code = e.getCode();
+        // token过期，重新获取
+        if (ErrorCodeEnum.error_42001.getCode().equals(code)) {
+            AccessToken token = wechat.base().accessToken();
+            wechat.tokenLoader.refresh(token);
+            resp = doGet(GET + token.getAccessToken());
+        } else {
+            throw e;
+        }
+    }
+    String jsonMenu = JSON.toJSONString(((Map) resp.get("menu")).get("button"));
+    return JSON.parseObject(jsonMenu, new TypeReference<ArrayList<Menu>>() {});
+}
+
+```
 
 ## 微信开发小工具
+微信开发还算便捷，微信本身提供了一系列开发者工具：
+1. [微信开发者文档](https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1445241432)
+
+2. [微信公众平台接口测试账号](https://mp.weixin.qq.com/debug/cgi-bin/sandbox?t=sandbox/login)
+
+3. [微信公众平台接口调试工具](https://mp.weixin.qq.com/debug)
+
+4. [ngrok内网穿透工具](https://natapp.cn/article/wechat_local_debug) (可以用本地项目调试，方便开发)
