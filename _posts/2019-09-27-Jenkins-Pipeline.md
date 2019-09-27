@@ -173,12 +173,19 @@ trigger_build_master:
 2. 检测出程序中的废代码，可以逆向反推在代码设计中思维混乱点，提醒设计/开发人员理清代码逻辑关系，提升代码质量。
 3. 代码覆盖率高不能说明代码质量高，但是反过来看，代码覆盖率低，代码质量不会高到哪里去，可以作为测试自我审视的重要工具之一。
 
-## 代码覆盖率工具比较
+## 代码覆盖率工具
 > 目前Java常用覆盖率工具Jacoco、Emma和Cobertura
 
-![pipeline4](https://raw.githubusercontent.com/BeanHaHa/BeanHaHa.github.io/master/assets/images/2019/pipeline4.png)
+|| **Jacoco** | **Emma** | **Cobertura** |
+|:---:|:----:|:----:|:----:|
+| __原理__ | 使用asm修改字节码|可以修改jar文件、class文件字节码文件|基于Jcoverage。基于ASM框架对Class插桩|
+| __覆盖粒度__ | 方法、类、行、分支、指令、圈 | 行、块、方法、类 | 行、分支 |
+| __插桩__ | on-the-fly和offline | on-the-fly和offline | offline |
+| __缺点__ |  | 不支持JDK8 | 关闭服务器才能获取覆盖率报告 |
+| __性能__ | 快 | 较快 | 较快 |
 
-![pipeline4](https://raw.githubusercontent.com/BeanHaHa/BeanHaHa.github.io/master/assets/images/2019/pipeline5.png)
+## Jacoco检测结果
+![pipeline5](https://raw.githubusercontent.com/BeanHaHa/BeanHaHa.github.io/master/assets/images/2019/pipeline5.png)
 
 
 ## 自动化集成流程（理论上）
@@ -186,3 +193,7 @@ trigger_build_master:
 2. 测试人员根据测试用例进行测试（包括手工测试和自动化测试），结合git获取本次变动代码的覆盖率信息。行覆盖率需达到100%，分支达到50%以上，这个需要具体场景具体分析。
 3. 测试通过之后，代码合并至主干，进行自动化回归。
 4. 回归测试通过之后，代码可以上线。
+
+## 参考
+
+[浅谈代码覆盖率](https://tech.youzan.com/code-coverage/)
