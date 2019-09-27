@@ -5,19 +5,19 @@ date: 2019-09-27
 tags: [Pipeline]
 ---
 
-##Jenkins 多分支流水线
+## Jenkins 多分支流水线
 
 Jenkins 流水线是一套插件，它支持实现和集成持续交付流水线到 Jenkins。流水线提供了一组可扩展的工具，用于通过流水线 DSL 将简单到复杂的交付流水线建模为“代码”。
 
-####1、什么是 pipeline
+#### 1、什么是 pipeline
 pipeline 是 jenkins 的一套插件，用于定义 CD 流程，弹性，可管理。
 
-####2、什么是 Jenkinsfile
+#### 2、什么是 Jenkinsfile
 通过代码的方式来管理 pipeline
 这样一来，可以通过版本控制系统来管理。
 
 
-####3、Jenkinsfile 的内容示例
+#### 3、Jenkinsfile 的内容示例
 ```json
 #!/usr/bin/env groovy
 pipeline {
@@ -119,7 +119,7 @@ pipeline {
 
 ```
 
-####4、Gradle项目 build.gradle添加Jacoco配置
+#### 4、Gradle项目 build.gradle添加Jacoco配置
 ```gradle
 apply plugin: 'jacoco'
 
@@ -173,15 +173,15 @@ trigger_build_master:
 2. 检测出程序中的废代码，可以逆向反推在代码设计中思维混乱点，提醒设计/开发人员理清代码逻辑关系，提升代码质量。
 3. 代码覆盖率高不能说明代码质量高，但是反过来看，代码覆盖率低，代码质量不会高到哪里去，可以作为测试自我审视的重要工具之一。
 
-##代码覆盖率工具比较
+## 代码覆盖率工具比较
 > 目前Java常用覆盖率工具Jacoco、Emma和Cobertura
 
 ![pipeline4](https://raw.githubusercontent.com/BeanHaHa/BeanHaHa.github.io/master/assets/images/2019/pipeline4.png)
 
-![pipeline5](https://raw.githubusercontent.com/BeanHaHa/BeanHaHa.github.io/master/assets/images/2019/pipeline5.png)
+![pipeline4](https://raw.githubusercontent.com/BeanHaHa/BeanHaHa.github.io/master/assets/images/2019/pipeline5.png)
 
 
-##自动化集成流程（理论上）
+## 自动化集成流程（理论上）
 1. 业务开发完成之后，开发人员做单元测试，单元测试完成之后，保证单元测试全部通过同时单元测试代码覆盖率达到一定程度（这个需要开发和测试约定，理论上越高越好），开发提测。
 2. 测试人员根据测试用例进行测试（包括手工测试和自动化测试），结合git获取本次变动代码的覆盖率信息。行覆盖率需达到100%，分支达到50%以上，这个需要具体场景具体分析。
 3. 测试通过之后，代码合并至主干，进行自动化回归。
