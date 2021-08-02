@@ -6,13 +6,14 @@ tags: [thread]
 ---
 
 看到一个关于线程状态的问题：
-有一个4*50的二维数组，用4个线程去分5个阶段去填满它，也就说，第一阶段大家一起填0-9，当大家都填满了0-9，再一起去填10-19，以此类推，先填满的线程要等着其他线程都填好了，再继续。
 
-##线程和进程
+> 有一个4*50的二维数组，用4个线程去分5个阶段去填满它，也就说，第一阶段大家一起填0-9，当大家都填满了0-9，再一起去填10-19，以此类推，先填满的线程要等着其他线程都填好了，再继续。
+
+## 线程和进程
 进程就是一个程序的执行流程，内部保存程序运行所需的资源,所以是系统资源调度和分配的最小单位。
 线程是系统分配处理器时间的基本单元，或者说进程之内独立执行的一个单元执行流。是程序执行的最小单位。
 
-#线程的状态
+## 线程的状态
 ```java
 public enum State {
     /**
@@ -79,8 +80,8 @@ public enum State {
     TERMINATED;
 }
 ```
-项目中，各种状态的变化
+## 状态间变化
 ![policy_state_machine](https://raw.githubusercontent.com/BeanHaHa/BeanHaHa.github.io/master/assets/images/2018/thread_state.jpg)
 
-
+## 项目
 [Github地址](https://github.com/BeanHaHa/day-day-up/blob/main/src/main/java/com/daobin/learning/daydayup/thread/ThreadState.java)
